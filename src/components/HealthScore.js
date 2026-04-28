@@ -33,11 +33,11 @@ export function HealthScore({ score }) {
   );
 }
 
-const scoreStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   wrap:   { position: 'relative', width: 110, height: 110, alignSelf: 'center' },
   center: { position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' },
   num:    { fontSize: 26, fontFamily: fonts.semibold },
   lbl:    { fontSize: 10, color: colors.textMuted, letterSpacing: 0.5, textTransform: 'uppercase' },
 });
 
-Object.assign(styles, scoreStyles);
+Object.assign(styles, styles);
