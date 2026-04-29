@@ -94,16 +94,48 @@ export default function PlanScreen() {
 // ── Settings Screen ───────────────────────────────────────────────
 import { TextInput, Alert } from 'react-native';
 import { useAuth as _useAuth } from '../context/AuthContext';
-import { changePassword, logout } from '../api/client';
+import { changePassword, logout, getMember, updateProfile } from '../api/client';
 
 export function SettingsScreen() {
   const { auth, signOut }  = _useAuth();
+
+  // Profile state
+  const [email,       setEmail]       = useState('');
+  const [phone,       setPhone]       = useState('');
+  const [profLoading, setProfLoading] = useState(false);
+  const [profError,   setProfError]   = useState('');
+  const [profSuccess, setProfSuccess] = useState('');
+
+  // Password state
   const [current,  setCurrent]  = useState('');
   const [newPass,  setNewPass]  = useState('');
   const [confirm,  setConfirm]  = useState('');
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
   const [success,  setSuccess]  = useState('');
+
+  // Load profile on mount
+  useEffect(() => {
+    (async () => {
+      const res = await getMember(auth.memberId);
+      if (res && !res.error) {
+        setEmail(res.email || '');
+        setPhone(res.phone || '');
+      }
+    })();
+  }, [auth.memberId]);
+
+  const handleUpdateProfile = async () => {
+    setProfError(''); setProfSuccess('');
+    if (!email.trim()) { setProfError('Email is required'); return; }
+    setProfLoading(true);
+    const res = await updateProfile(auth.memberId, email.trim().toLowerCase(), phone.trim());
+    setProfLoading(false);
+    if (res?.status === 'success') {
+      setProfSuccess('Profile updated!');
+      setTimeout(() => setProfSuccess(''), 3000);
+    } else setProfError(res?.error || 'Update failed');
+  };
 
   const handleChangePassword = async () => {
     setError(''); setSuccess('');
@@ -134,8 +166,41 @@ export function SettingsScreen() {
   return (
     <ScrollView style={ss.scroll} contentContainerStyle={ss.content}>
       <Text style={ss.name}>{auth.name}</Text>
-      <Text style={ss.email}>{auth.username}</Text>
 
+      {/* Profile card */}
+      <View style={ss.card}>
+        <Text style={ss.cardTitle}>Profile</Text>
+        <Text style={ss.label}>Full Name</Text>
+        <View style={[ss.input, ss.inputDisabled]}>
+          <Text style={{ color: colors.textMuted, fontSize: 14 }}>{auth.name}</Text>
+        </View>
+        <Text style={ss.label}>Email</Text>
+        <TextInput
+          style={ss.input}
+          value={email}
+          onChangeText={setEmail}
+          placeholder="your@email.com"
+          placeholderTextColor={colors.gray400}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Text style={ss.label}>Phone</Text>
+        <TextInput
+          style={ss.input}
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+91 9876543210"
+          placeholderTextColor={colors.gray400}
+          keyboardType="phone-pad"
+        />
+        {profError   ? <View style={ss.errorBox}><Text style={ss.errorText}>{profError}</Text></View>   : null}
+        {profSuccess ? <View style={ss.successBox}><Text style={ss.successText}>{profSuccess}</Text></View> : null}
+        <TouchableOpacity style={[ss.btn, profLoading && ss.btnDisabled]} onPress={handleUpdateProfile} disabled={profLoading}>
+          {profLoading ? <ActivityIndicator color={colors.white} /> : <Text style={ss.btnText}>Save Profile</Text>}
+        </TouchableOpacity>
+      </View>
+
+      {/* Change password card */}
       {auth.allowPasswordChange ? (
         <View style={ss.card}>
           <Text style={ss.cardTitle}>Change Password</Text>
@@ -206,6 +271,7 @@ const ss = StyleSheet.create({
   cardTitle:    { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginBottom: 18 },
   label:        { fontSize: 11, fontFamily: fonts.semibold, color: colors.textMuted, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 6 },
   input:        { backgroundColor: colors.gray50, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: radius.sm, padding: 12, fontSize: 14, color: colors.text, marginBottom: 14 },
+  inputDisabled:{ opacity: 0.6 },
   errorBox:     { backgroundColor: 'rgba(239,68,68,.08)', borderWidth: 1, borderColor: 'rgba(239,68,68,.2)', borderRadius: radius.sm, padding: 12, marginBottom: 14 },
   errorText:    { fontSize: 13, color: colors.red },
   successBox:   { backgroundColor: 'rgba(16,185,129,.08)', borderWidth: 1, borderColor: 'rgba(16,185,129,.2)', borderRadius: radius.sm, padding: 12, marginBottom: 14 },

@@ -2,5 +2,20 @@
   "plugins": [
     "expo-font",
     "expo-secure-store"
-  ]
+  ],
+  "extra": {
+    "eas": {
+      "projectId": "0e890f93-c690-41d4-a43a-a7609aaeb5a2"
+    }
+  },
+  "expo": {
+    "android": {
+      "package": "com.fleekhj.fleekclient"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0e890f93-c690-41d4-a43a-a7609aaeb5a2"
+      }
+    }
+  }
 }

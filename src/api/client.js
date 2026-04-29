@@ -50,6 +50,34 @@ export const getFamilyPlan = (familyId) =>
 export const getMemberCAS = (familyId, memberId) =>
   request(`/api/families/${familyId}/members/${memberId}/cas`);
 
+// ── Profile ───────────────────────────────────────────────────────
+export const getMember = (memberId) =>
+  request(`/api/members/${memberId}`);
+
+export const updateProfile = (memberId, email, phone) =>
+  request(`/api/members/${memberId}/profile`, {
+    method: 'PUT',
+    body: { email, phone },
+  });
+
+// ── Goals & Notes ─────────────────────────────────────────────────
+export const saveGoals = (familyId, goals) =>
+  request(`/api/families/${familyId}/data/goals`, {
+    method: 'POST', body: goals,
+  });
+
+export const saveClientNote = (familyId, note) =>
+  request(`/api/families/${familyId}/data/client_notes`, {
+    method: 'POST',
+    body: { note, updated_at: new Date().toLocaleDateString('en-IN') },
+  });
+
+// ── Risk Profile ──────────────────────────────────────────────────
+export const saveRiskProfile = (familyId, memberId, payload) =>
+  request(`/api/families/${familyId}/members/${memberId}/data/risk_profile`, {
+    method: 'POST', body: payload,
+  });
+
 // ── Change password ───────────────────────────────────────────────
 export const changePassword = (memberId, currentPassword, newPassword) =>
   request(`/api/members/${memberId}/change-password`, {
